@@ -1,0 +1,76 @@
+create table departements(
+    id int  primary key ,
+    nom_dept varchar(100) not null unique
+);
+create sequence seq_id_departements start with 1 increment by 1 ; /* pour faire l'auto incrementation cette etape est necessaire */
+
+create table employees(
+    id int primary key,
+    nom varchar(50),
+    prenom varchar(50),
+    salaire decimal(10,2),
+    poste varchar(50),
+    departement_id int,
+    foreign key(departement_id) references departements(id)
+);
+
+create sequence seq_id_employees start with 1 increment by 1 ;
+
+create table logs(
+    id_log int primary key ,
+    action_name varchar(255),
+    date_action timestamp
+);
+create sequence seq_id_logs start with 1 increment by 1 ;
+
+insert into departements values(seq_id_departements.nextval,'maths');
+insert into employees values(seq_id_employees.nextval,'mjb','nad',10000,'docteur',1);
+
+/* version bloc anonyme */
+declare 
+nbr_total int ;
+begin 
+    select count(*) into nbr_total from employees ;
+    dbms_output.put_line(nbr_total);
+end ;
+
+/* version procedure */
+create or replace procedure total_employees is 
+nbr_total int;
+begin 
+    select count(*) into nbr_total from employees ;
+    dbms_output.put_line(nbr_total);
+end;
+        
+create or replace procedure total_employees(nbr_total out int ) is
+begin 
+    select count(*) into nbr_total from employees ; 
+end;
+
+create or replace procedure verifier_salaire(emp_id in int) is 
+val_sal decimal(10,2);
+begin
+    select salaire into val_sal from employees where emp_id= id ;
+    if(val_sal>2500) then
+    dbms_output.put_line('salaire élevé');
+    elsif (1500<val_sal) then 
+    dbms_output.put_line('salaire moyen');
+    else 
+    dbms_output.put_line('salaire faire');
+    end if;
+end;
+
+create or replace function categorie_employee(emp_id in int) return varchar2 is 
+val_sal decimal(10,2);
+begin 
+    select salaire into val_sal from employees where emp_id= id ;
+    if(val_sal>=3000) then
+    return 'top management';
+    elsif (val_sal>2500) then 
+    return 'cadre' ;
+    elsif (val_sal >=1500) then
+    return 'employé';
+    else 
+    return 'stagiaire' ;
+    end if;
+end;
